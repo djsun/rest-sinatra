@@ -1,6 +1,6 @@
-require File.expand_path(File.dirname(__FILE__) + '/../helpers/spec_helper.rb')
-require File.expand_path(File.dirname(__FILE__) + '/../helpers/posts.rb')
-require File.expand_path(File.dirname(__FILE__) + '/../helpers/comments.rb')
+require File.expand_path(File.dirname(__FILE__) + '/../spec_helper.rb')
+require File.expand_path(File.dirname(__FILE__) + '/helpers/posts.rb')
+require File.expand_path(File.dirname(__FILE__) + '/helpers/comments.rb')
 
 describe "Posts" do
   

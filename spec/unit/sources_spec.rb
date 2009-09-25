@@ -1,5 +1,5 @@
-require File.expand_path(File.dirname(__FILE__) + '/../helpers/spec_helper')
-require File.expand_path(File.dirname(__FILE__) + '/../helpers/sources')
+require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
+require File.expand_path(File.dirname(__FILE__) + '/helpers/sources')
 
 describe "Sources" do
   
