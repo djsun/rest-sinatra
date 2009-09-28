@@ -90,15 +90,15 @@ module RestSinatra
         id = params.delete("id")
         validate_before_create(params, model, read_only)
         @document = model.find_by_id(id)
-        callback callbacks[:before_save]
-        callback callbacks[:before_create]
+        callback(callbacks[:before_save])
+        callback(callbacks[:before_create])
         @document = model.new(params)
         unless @document.valid?
           error 400, { "errors" => @document.errors.errors }.to_json
         end
         @document.save
-        callback callbacks[:after_create]
-        callback callbacks[:after_save]
+        callback(callbacks[:after_create])
+        callback(callbacks[:after_save])
         response.status = 201
         response.headers['Location'] = full_uri "/#{name}/#{@document.id}"
         @document.to_json
@@ -177,13 +177,13 @@ module RestSinatra
         permission_check(:curator, permission, parent_id)
         @parent_document = find_parent(parent_model, parent_id)
         validate_before_create(params, child_model, read_only)
-        callback callbacks[:before_save]
-        callback callbacks[:before_create]
+        callback(callbacks[:before_save])
+        callback(callbacks[:before_create])
         @child_document = child_model.new(params)
         @parent_document.send(association) << @child_document
         error 500, [].to_json unless @parent_document.save
-        callback callbacks[:after_create]
-        callback callbacks[:after_save]
+        callback(callbacks[:after_create])
+        callback(callbacks[:after_save])
         response.status = 201
         response.headers['Location'] = full_uri(
           "/#{parent_name}/#{parent_id}/#{child_name}/#{@child_document.id}"
@@ -197,14 +197,14 @@ module RestSinatra
         child_id = params.delete("child_id")
         @parent_document, @child_document = find_documents(parent_model, parent_id, association, child_id)
         validate_before_update(params, child_model, read_only)
-        callback callbacks[:before_save]
-        callback callbacks[:before_update]
+        callback(callbacks[:before_save])
+        callback(callbacks[:before_update])
         @child_document.attributes = params
         child_index = @parent_document.send(association).index(@child_document)
         @parent_document.send(association)[child_index] = @child_document
         error 500, [].to_json unless @parent_document.save
-        callback callbacks[:after_update]
-        callback callbacks[:after_save]
+        callback(callbacks[:after_update])
+        callback(callbacks[:after_save])
         @child_document.to_json
       end
 
@@ -213,9 +213,9 @@ module RestSinatra
         permission_check(:curator, permission, parent_id)
         child_id = params.delete("child_id")
         @parent_document, @child_document = find_documents(parent_model, parent_id, association, child_id)
-        callback callbacks[:before_destroy]
+        callback(callbacks[:before_destroy])
         @parent_document.send(association).delete(@child_document)
-        callback callbacks[:after_destroy]
+        callback(callbacks[:after_destroy])
         error 500, [].to_json unless @parent_document.save
         { "id" => child_id }.to_json
       end
