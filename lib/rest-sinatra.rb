@@ -110,7 +110,6 @@ module RestSinatra
         validate_before_update(params, model, read_only)
         callback(callbacks[:before_save])
         callback(callbacks[:before_update])
-        validate_before_update(params, model, read_only)
         @document = model.update(id, params)
         unless @document.valid?
           error 400, { "errors" => @document.errors.errors }.to_json
