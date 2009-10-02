@@ -86,9 +86,7 @@ module RestSinatra
 
       post '/?' do
         require_at_least(:curator)
-        id = params.delete("id")
         validate_before_create(params, model, read_only)
-        @document = model.find_by_id(id)
         callback(callbacks[:before_save])
         callback(callbacks[:before_create])
         @document = model.new(params)
