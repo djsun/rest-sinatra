@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["David James"]
-  s.date = %q{2009-09-24}
+  s.date = %q{2009-10-02}
   s.description = %q{Provides a DSL for making RESTful Sinatra actions with MongoMapper models.}
   s.email = %q{djames@sunlightfoundation.com}
   s.extra_rdoc_files = [
@@ -24,12 +24,12 @@ Gem::Specification.new do |s|
      "Rakefile",
      "VERSION",
      "lib/rest-sinatra.rb",
-     "spec/helpers/comments.rb",
-     "spec/helpers/posts.rb",
-     "spec/helpers/sinatra_stubs.rb",
-     "spec/helpers/sources.rb",
-     "spec/helpers/spec_helper.rb",
+     "rest-sinatra.gemspec",
      "spec/spec_helper.rb",
+     "spec/unit/helpers/comments.rb",
+     "spec/unit/helpers/posts.rb",
+     "spec/unit/helpers/sinatra_stubs.rb",
+     "spec/unit/helpers/sources.rb",
      "spec/unit/posts_and_comments_spec.rb",
      "spec/unit/sources_spec.rb"
   ]
@@ -39,12 +39,11 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.3.5}
   s.summary = %q{Easily write RESTful actions with Sinatra and MongoMapper}
   s.test_files = [
-    "spec/helpers/comments.rb",
-     "spec/helpers/posts.rb",
-     "spec/helpers/sinatra_stubs.rb",
-     "spec/helpers/sources.rb",
-     "spec/helpers/spec_helper.rb",
-     "spec/spec_helper.rb",
+    "spec/spec_helper.rb",
+     "spec/unit/helpers/comments.rb",
+     "spec/unit/helpers/posts.rb",
+     "spec/unit/helpers/sinatra_stubs.rb",
+     "spec/unit/helpers/sources.rb",
      "spec/unit/posts_and_comments_spec.rb",
      "spec/unit/sources_spec.rb"
   ]
