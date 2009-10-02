@@ -73,6 +73,7 @@ module RestSinatra
 
       get '/?' do
         require_at_least(:basic)
+        validate_before_find_all(params, model)
         @documents = find_with_filters(params, model)
         @documents.to_json
       end
@@ -80,6 +81,7 @@ module RestSinatra
       get '/:id/?' do |id|
         require_at_least(:basic)
         id = params.delete("id")
+        validate_before_find_one(params, model)
         @document = find_document!(model, id)
         @document.to_json
       end
@@ -164,6 +166,7 @@ module RestSinatra
         permission_check(:basic, permission, parent_id)
         @parent_document = find_parent!(parent_model, parent_id)
         all_child_documents = @parent_document.send(association)
+        validate_before_find_all(params, child_model) # ?
         @child_documents = nested_find_with_filters(all_child_documents, params, parent_model)
         @child_documents.to_json
       end
@@ -172,6 +175,7 @@ module RestSinatra
         parent_id = params.delete("parent_id")
         permission_check(:basic, permission, parent_id)
         child_id = params.delete("child_id")
+        validate_before_find_one(params, child_model) # ?
         @parent_document, @child_document = find_documents!(parent_model, parent_id, association, child_id)
         @child_document.to_json
       end
