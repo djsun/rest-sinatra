@@ -80,8 +80,7 @@ module RestSinatra
       get '/:id/?' do |id|
         require_at_least(:basic)
         id = params.delete("id")
-        @document = model.find_by_id(id)
-        error 404, [].to_json unless @document
+        @document = find_document!(model, id)
         @document.to_json
       end
 
@@ -107,8 +106,7 @@ module RestSinatra
       put '/:id/?' do
         require_at_least(:curator)
         id = params.delete("id")
-        @document = model.find_by_id(id)
-        error 404, [].to_json unless @document
+        @document = find_document!(model, id)
         validate_before_update(params, model, read_only)
         callback(callbacks[:before_save])
         callback(callbacks[:before_update])
@@ -125,13 +123,21 @@ module RestSinatra
       delete '/:id/?' do
         require_at_least(:curator)
         id = params.delete("id")
-        @document = model.find_by_id(id)
-        error 404, [].to_json unless @document
+        @document = find_document!(model, id)
         callback(callbacks[:before_destroy])
         @document.destroy
         callback(callbacks[:after_destroy])
         { "id" => id }.to_json
       end
+
+      helpers do
+        def find_document!(model, id)
+          document = model.find_by_id(id)
+          error 404, [].to_json unless document
+          document
+        end
+      end
+
     end
 
     def build_nested_resources(parent_config)
@@ -158,9 +164,9 @@ module RestSinatra
       get "/:parent_id/#{child_name}/?" do
         parent_id = params.delete("parent_id")
         permission_check(:basic, permission, parent_id)
-        @parent_document = find_parent(parent_model, parent_id)
+        @parent_document = find_parent!(parent_model, parent_id)
         all_child_documents = @parent_document.send(association)
-        @child_documents = nested_find(all_child_documents, params, parent_model)
+        @child_documents = nested_find_with_filters(all_child_documents, params, parent_model)
         @child_documents.to_json
       end
 
@@ -168,14 +174,14 @@ module RestSinatra
         parent_id = params.delete("parent_id")
         permission_check(:basic, permission, parent_id)
         child_id = params.delete("child_id")
-        @parent_document, @child_document = find_documents(parent_model, parent_id, association, child_id)
+        @parent_document, @child_document = find_documents!(parent_model, parent_id, association, child_id)
         @child_document.to_json
       end
 
       post "/:parent_id/#{child_name}/?" do
         parent_id = params.delete("parent_id")
         permission_check(:curator, permission, parent_id)
-        @parent_document = find_parent(parent_model, parent_id)
+        @parent_document = find_parent!(parent_model, parent_id)
         validate_before_create(params, child_model, read_only)
         callback(callbacks[:before_save])
         callback(callbacks[:before_create])
@@ -195,7 +201,7 @@ module RestSinatra
         parent_id = params.delete("parent_id")
         permission_check(:curator, permission, parent_id)
         child_id = params.delete("child_id")
-        @parent_document, @child_document = find_documents(parent_model, parent_id, association, child_id)
+        @parent_document, @child_document = find_documents!(parent_model, parent_id, association, child_id)
         validate_before_update(params, child_model, read_only)
         callback(callbacks[:before_save])
         callback(callbacks[:before_update])
@@ -212,7 +218,7 @@ module RestSinatra
         parent_id = params.delete("parent_id")
         permission_check(:curator, permission, parent_id)
         child_id = params.delete("child_id")
-        @parent_document, @child_document = find_documents(parent_model, parent_id, association, child_id)
+        @parent_document, @child_document = find_documents!(parent_model, parent_id, association, child_id)
         callback(callbacks[:before_destroy])
         @parent_document.send(association).delete(@child_document)
         callback(callbacks[:after_destroy])
@@ -221,21 +227,21 @@ module RestSinatra
       end
 
       helpers do
-        def find_parent(parent_model, parent_id)
+        def find_parent!(parent_model, parent_id)
           parent_document = parent_model.find_by_id(parent_id)
           error 404, [].to_json unless parent_document
           parent_document
         end
 
-        def find_child(parent_document, association, child_id)
+        def find_child!(parent_document, association, child_id)
           child_document = parent_document.send(association).find { |x| x.id == child_id }
           error 404, [].to_json unless child_document
           child_document
         end
 
-        def find_documents(parent_model, parent_id, association, child_id)
-          parent_document = find_parent(parent_model, parent_id)
-          child_document = find_child(parent_document, association, child_id)
+        def find_documents!(parent_model, parent_id, association, child_id)
+          parent_document = find_parent!(parent_model, parent_id)
+          child_document = find_child!(parent_document, association, child_id)
           [parent_document, child_document]
         end
       end
