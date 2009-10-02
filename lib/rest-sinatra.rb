@@ -73,7 +73,7 @@ module RestSinatra
 
       get '/?' do
         require_at_least(:basic)
-        @documents = find(params, model)
+        @documents = find_with_filters(params, model)
         @documents.to_json
       end
 
