@@ -235,7 +235,7 @@ module RestSinatra
         end
 
         def find_child!(parent_document, association, child_id)
-          child_document = parent_document.send(association).find { |x| x.id == child_id }
+          child_document = parent_document.send(association).detect { |x| x.id == child_id }
           error 404, [].to_json unless child_document
           child_document
         end
