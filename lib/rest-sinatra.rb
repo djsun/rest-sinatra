@@ -75,7 +75,7 @@ module RestSinatra
         require_at_least(:basic)
         validate_before_find_all(params, model)
         @documents = find_with_filters(params, model)
-        @documents.to_json
+        @documents.render
       end
 
       get '/:id/?' do |id|
@@ -83,7 +83,7 @@ module RestSinatra
         id = params.delete("id")
         validate_before_find_one(params, model)
         @document = find_document!(model, id)
-        @document.to_json
+        @document.render
       end
 
       post '/?' do
@@ -95,12 +95,11 @@ module RestSinatra
         unless @document.valid?
           error 400, { "errors" => @document.errors.errors }.to_json
         end
-        @document.save
         callback(callbacks[:after_create])
         callback(callbacks[:after_save])
         response.status = 201
         response.headers['Location'] = full_uri "/#{name}/#{@document.id}"
-        @document.to_json
+        @document.render
       end
 
       put '/:id/?' do
@@ -116,7 +115,7 @@ module RestSinatra
         end
         callback(callbacks[:after_update])
         callback(callbacks[:after_save])
-        @document.to_json
+        @document.render
       end
 
       delete '/:id/?' do
@@ -167,7 +166,7 @@ module RestSinatra
         all_child_documents = @parent_document.send(association)
         validate_before_find_all(params, child_model) # ?
         @child_documents = nested_find_with_filters(all_child_documents, params, parent_model)
-        @child_documents.to_json
+        @child_documents.render
       end
 
       get "/:parent_id/#{child_name}/:child_id/?" do
@@ -176,7 +175,7 @@ module RestSinatra
         child_id = params.delete("child_id")
         validate_before_find_one(params, child_model) # ?
         @parent_document, @child_document = find_documents!(parent_model, parent_id, association, child_id)
-        @child_document.to_json
+        @child_document.render
       end
 
       post "/:parent_id/#{child_name}/?" do
@@ -195,7 +194,7 @@ module RestSinatra
         response.headers['Location'] = full_uri(
           "/#{parent_name}/#{parent_id}/#{child_name}/#{@child_document.id}"
         )
-        @child_document.to_json
+        @child_document.render
       end
 
       put "/:parent_id/#{child_name}/:child_id/?" do
@@ -212,7 +211,7 @@ module RestSinatra
         error 500, [].to_json unless @parent_document.save
         callback(callbacks[:after_update])
         callback(callbacks[:after_save])
-        @child_document.to_json
+        @child_document.render
       end
 
       delete "/:parent_id/#{child_name}/:child_id/?" do
