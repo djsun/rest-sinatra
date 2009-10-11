@@ -95,6 +95,7 @@ module RestSinatra
         unless @document.valid?
           error 400, { "errors" => @document.errors.errors }.to_json
         end
+        error 500, [].to_json unless @document.save
         callback(callbacks[:after_create])
         callback(callbacks[:after_save])
         response.status = 201
