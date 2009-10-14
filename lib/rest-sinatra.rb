@@ -31,14 +31,15 @@ module RestSinatra
       scope.extend(ResourceMethods)
       scope.instance_eval do
         @c = {
-          :name             => name,
-          :resource_type    => resource_type,
-          :model            => nil,
-          :read_only        => [],
-          :resource         => nil,
-          :permission       => nil,
-          :callbacks        => {},
-          :nested_resources => []
+          :name                 => name,
+          :resource_type        => resource_type,
+          :model                => nil,
+          :read_only            => [],
+          :resource             => nil,
+          :permission_to_view   => nil,
+          :permission_to_modify => nil,
+          :callbacks            => {},
+          :nested_resources     => []
         }
       end
       scope.instance_eval(&block)
@@ -68,17 +69,18 @@ module RestSinatra
     end
 
     def build_parent_resource(config)
-      callbacks  = config[:callbacks]
-      model      = config[:model]
-      name       = config[:name]
-      permission = config[:permission]
-      read_only  = config[:read_only]
-      resource   = config[:resource]
+      callbacks            = config[:callbacks]
+      model                = config[:model]
+      name                 = config[:name]
+      permission_to_view   = config[:permission_to_view]
+      permission_to_modify = config[:permission_to_modify]
+      read_only            = config[:read_only]
+      resource             = config[:resource]
 
       get '/?' do
         permission_check(
           :default  => :basic,
-          :override => permission
+          :override => permission_to_view
         )
         validate_before_find_all(params, model)
         documents = find_with_filters(params, model)
@@ -90,7 +92,7 @@ module RestSinatra
       get '/:id/?' do |id|
         permission_check(
           :default  => :basic,
-          :override => permission
+          :override => permission_to_view
         )
         id = params.delete("id")
         validate_before_find_one(params, model)
@@ -103,7 +105,7 @@ module RestSinatra
       post '/?' do
         permission_check(
           :default  => :admin,
-          :override => permission
+          :override => permission_to_modify
         )
         validate_before_create(params, model, read_only)
         callback(callbacks[:before_save])
@@ -121,7 +123,7 @@ module RestSinatra
       put '/:id/?' do
         permission_check(
           :default  => :admin,
-          :override => permission
+          :override => permission_to_modify
         )
         id = params.delete("id")
         @document = find_document!(model, id)
@@ -139,7 +141,7 @@ module RestSinatra
       delete '/:id/?' do
         permission_check(
           :default  => :admin,
-          :override => permission
+          :override => permission_to_modify
         )
         id = params.delete("id")
         @document = find_document!(model, id)
@@ -172,12 +174,13 @@ module RestSinatra
     # klass       : nested resource class
     # association : a method on the parent model that will return child models
     def build_nested_resource(klass, association, parent_config, child_config)
-      callbacks       = child_config[:callbacks]
-      child_model     = child_config[:model]
-      child_name      = child_config[:name]
-      child_resource  = child_config[:resource]
-      permission      = child_config[:permission]
-      read_only       = child_config[:read_only]
+      callbacks            = child_config[:callbacks]
+      child_model          = child_config[:model]
+      child_name           = child_config[:name]
+      child_resource       = child_config[:resource]
+      permission_to_view   = child_config[:permission_to_view]
+      permission_to_modify = child_config[:permission_to_modify]
+      read_only            = child_config[:read_only]
 
       parent_model    = parent_config[:model]
       parent_name     = parent_config[:name]
@@ -186,7 +189,7 @@ module RestSinatra
       get "/:parent_id/#{child_name}/?" do
         permission_check(
           :default  => :basic,
-          :override => permission
+          :override => permission_to_view
         )
         parent_id = params.delete("parent_id")
         parent_document = find_parent!(parent_model, parent_id)
@@ -204,7 +207,7 @@ module RestSinatra
       get "/:parent_id/#{child_name}/:child_id/?" do
         permission_check(
           :default  => :basic,
-          :override => permission
+          :override => permission_to_view
         )
         parent_id = params.delete("parent_id")
         child_id = params.delete("child_id")
@@ -220,7 +223,7 @@ module RestSinatra
       post "/:parent_id/#{child_name}/?" do
         permission_check(
           :default  => :admin,
-          :override => permission
+          :override => permission_to_modify
         )
         parent_id = params.delete("parent_id")
         @parent_document = find_parent!(parent_model, parent_id)
@@ -243,7 +246,7 @@ module RestSinatra
       put "/:parent_id/#{child_name}/:child_id/?" do
         permission_check(
           :default  => :admin,
-          :override => permission
+          :override => permission_to_modify
         )
         parent_id = params.delete("parent_id")
         child_id = params.delete("child_id")
@@ -266,7 +269,7 @@ module RestSinatra
       delete "/:parent_id/#{child_name}/:child_id/?" do
         permission_check(
           :default  => :admin,
-          :override => permission
+          :override => permission_to_modify
         )
         parent_id = params.delete("parent_id")
         child_id = params.delete("child_id")
@@ -317,9 +320,14 @@ module RestSinatra
       @c[:read_only] << attribute
     end
     
-    def permission(level)
-      raise "permission already declared" if @c[:permission]
-      @c[:permission] = level
+    def permission_to_view(level)
+      raise "permission already declared" if @c[:permission_to_view]
+      @c[:permission_to_view] = level
+    end
+
+    def permission_to_modify(level)
+      raise "permission already declared" if @c[:permission_to_modify]
+      @c[:permission_to_modify] = level
     end
     
     def callback(name, &block)

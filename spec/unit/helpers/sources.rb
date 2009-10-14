@@ -8,5 +8,8 @@ class Sources
   
   @r = resource "sources" do
     model Source
+
+    permission_to_view :basic
+    permission_to_modify :owner
   end
 end
