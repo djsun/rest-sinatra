@@ -20,6 +20,7 @@ module RestSinatra
     
     def _resource(name, resource_type, &block)
       config = evaluate_block(name, resource_type, &block)
+      config[:resource] = self
       validate(config)
       build_resource(config)
       config
@@ -34,6 +35,7 @@ module RestSinatra
           :resource_type    => resource_type,
           :model            => nil,
           :read_only        => [],
+          :resource         => nil,
           :permission       => nil,
           :callbacks        => {},
           :nested_resources => []
@@ -70,6 +72,7 @@ module RestSinatra
       model     = config[:model]
       name      = config[:name]
       read_only = config[:read_only]
+      resource  = config[:resource]
 
       get '/?' do
         require_at_least(:basic)
@@ -154,11 +157,13 @@ module RestSinatra
       callbacks       = child_config[:callbacks]
       child_model     = child_config[:model]
       child_name      = child_config[:name]
+      child_resource  = child_config[:resource]
       permission      = child_config[:permission]
       read_only       = child_config[:read_only]
 
       parent_model    = parent_config[:model]
       parent_name     = parent_config[:name]
+      parent_resource = parent_config[:resource]
 
       get "/:parent_id/#{child_name}/?" do
         parent_id = params.delete("parent_id")

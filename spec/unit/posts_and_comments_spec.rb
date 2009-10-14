@@ -17,6 +17,10 @@ describe "Posts" do
       @config[:model].should == Post
     end
 
+    it "resource should be Posts" do
+      @config[:resource].should == Posts
+    end
+
     it "read_only should be correct" do
       @config[:read_only].should == [:created_at, :updated_at]
     end
@@ -131,6 +135,10 @@ describe "Comments" do
 
     it "model should be Comment" do
       @config[:model].should == Comment
+    end
+
+    it "model should be Comments" do
+      @config[:resource].should == Comments
     end
 
     it "read_only should be correct" do

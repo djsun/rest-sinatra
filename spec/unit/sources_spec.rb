@@ -15,6 +15,10 @@ describe "Sources" do
     it "model should be Source" do
       @config[:model].should == Source
     end
+    
+    it "resource should be Sources" do
+      @config[:resource].should == Sources
+    end
 
     it "read_only should be empty" do
       @config[:read_only].should == []
