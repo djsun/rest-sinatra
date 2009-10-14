@@ -178,24 +178,24 @@ module RestSinatra
       parent_resource = parent_config[:resource]
 
       get "/:parent_id/#{child_name}/?" do
-        parent_id = params.delete("parent_id")
-        @parent_document = find_parent!(parent_model, parent_id)
-        all_child_documents = @parent_document.send(association)
         permission_check(
           :default  => :basic,
           :override => permission
         )
+        parent_id = params.delete("parent_id")
+        @parent_document = find_parent!(parent_model, parent_id)
+        all_child_documents = @parent_document.send(association)
         validate_before_find_all(params, child_model) # ?
         @child_documents = nested_find_with_filters(all_child_documents, params, parent_model)
         @child_documents.render
       end
 
       get "/:parent_id/#{child_name}/:child_id/?" do
-        parent_id = params.delete("parent_id")
         permission_check(
           :default  => :basic,
           :override => permission
         )
+        parent_id = params.delete("parent_id")
         child_id = params.delete("child_id")
         validate_before_find_one(params, child_model) # ?
         @parent_document, @child_document = find_documents!(parent_model, parent_id, association, child_id)
@@ -203,11 +203,11 @@ module RestSinatra
       end
 
       post "/:parent_id/#{child_name}/?" do
-        parent_id = params.delete("parent_id")
         permission_check(
           :default  => :curator,
           :override => permission
         )
+        parent_id = params.delete("parent_id")
         @parent_document = find_parent!(parent_model, parent_id)
         validate_before_create(params, child_model, read_only)
         callback(callbacks[:before_save])
@@ -225,11 +225,11 @@ module RestSinatra
       end
 
       put "/:parent_id/#{child_name}/:child_id/?" do
-        parent_id = params.delete("parent_id")
         permission_check(
           :default  => :curator,
           :override => permission
         )
+        parent_id = params.delete("parent_id")
         child_id = params.delete("child_id")
         @parent_document, @child_document = find_documents!(parent_model, parent_id, association, child_id)
         validate_before_update(params, child_model, read_only)
@@ -245,11 +245,11 @@ module RestSinatra
       end
 
       delete "/:parent_id/#{child_name}/:child_id/?" do
-        parent_id = params.delete("parent_id")
         permission_check(
           :default  => :curator,
           :override => permission
         )
+        parent_id = params.delete("parent_id")
         child_id = params.delete("child_id")
         @parent_document, @child_document = find_documents!(parent_model, parent_id, association, child_id)
         callback(callbacks[:before_destroy])
