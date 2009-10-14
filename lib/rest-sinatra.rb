@@ -81,8 +81,8 @@ module RestSinatra
           :override => permission
         )
         validate_before_find_all(params, model)
-        @documents = find_with_filters(params, model)
-        @documents.render
+        documents = find_with_filters(params, model)
+        documents.render
       end
 
       get '/:id/?' do |id|
@@ -92,8 +92,8 @@ module RestSinatra
         )
         id = params.delete("id")
         validate_before_find_one(params, model)
-        @document = find_document!(model, id)
-        @document.render
+        document = find_document!(model, id)
+        document.render
       end
 
       post '/?' do
@@ -183,11 +183,11 @@ module RestSinatra
           :override => permission
         )
         parent_id = params.delete("parent_id")
-        @parent_document = find_parent!(parent_model, parent_id)
-        all_child_documents = @parent_document.send(association)
+        parent_document = find_parent!(parent_model, parent_id)
+        all_child_documents = parent_document.send(association)
         validate_before_find_all(params, child_model) # ?
-        @child_documents = nested_find_with_filters(all_child_documents, params, parent_model)
-        @child_documents.render
+        child_documents = nested_find_with_filters(all_child_documents, params, parent_model)
+        child_documents.render
       end
 
       get "/:parent_id/#{child_name}/:child_id/?" do
@@ -198,8 +198,8 @@ module RestSinatra
         parent_id = params.delete("parent_id")
         child_id = params.delete("child_id")
         validate_before_find_one(params, child_model) # ?
-        @parent_document, @child_document = find_documents!(parent_model, parent_id, association, child_id)
-        @child_document.render
+        parent_document, child_document = find_documents!(parent_model, parent_id, association, child_id)
+        child_document.render
       end
 
       post "/:parent_id/#{child_name}/?" do
