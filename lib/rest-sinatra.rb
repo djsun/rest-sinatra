@@ -95,10 +95,8 @@ module RestSinatra
         callback(callbacks[:before_save])
         callback(callbacks[:before_create])
         @document = model.new(params)
-        unless @document.valid?
-          error 400, { "errors" => @document.errors.errors }.to_json
-        end
-        error 500, [].to_json unless @document.save
+        invalid_document! unless @document.valid?
+        internal_server_error! unless @document.save
         callback(callbacks[:after_create])
         callback(callbacks[:after_save])
         response.status = 201
@@ -114,9 +112,7 @@ module RestSinatra
         callback(callbacks[:before_save])
         callback(callbacks[:before_update])
         @document = model.update(id, params)
-        unless @document.valid?
-          error 400, { "errors" => @document.errors.errors }.to_json
-        end
+        invalid_document! unless @document.valid?
         callback(callbacks[:after_update])
         callback(callbacks[:after_save])
         @document.render
@@ -135,7 +131,7 @@ module RestSinatra
       helpers do
         def find_document!(model, id)
           document = model.find_by_id(id)
-          error 404, [].to_json unless document
+          not_found! unless document
           document
         end
       end
@@ -193,7 +189,7 @@ module RestSinatra
         callback(callbacks[:before_create])
         @child_document = child_model.new(params)
         @parent_document.send(association) << @child_document
-        error 500, [].to_json unless @parent_document.save
+        internal_server_error! unless @parent_document.save
         callback(callbacks[:after_create])
         callback(callbacks[:after_save])
         response.status = 201
@@ -214,7 +210,7 @@ module RestSinatra
         @child_document.attributes = params
         child_index = @parent_document.send(association).index(@child_document)
         @parent_document.send(association)[child_index] = @child_document
-        error 500, [].to_json unless @parent_document.save
+        internal_server_error! unless @parent_document.save
         callback(callbacks[:after_update])
         callback(callbacks[:after_save])
         @child_document.render
@@ -228,20 +224,20 @@ module RestSinatra
         callback(callbacks[:before_destroy])
         @parent_document.send(association).delete(@child_document)
         callback(callbacks[:after_destroy])
-        error 500, [].to_json unless @parent_document.save
+        internal_server_error! unless @parent_document.save
         { "id" => child_id }.to_json
       end
 
       helpers do
         def find_parent!(parent_model, parent_id)
           parent_document = parent_model.find_by_id(parent_id)
-          error 404, [].to_json unless parent_document
+          not_found! unless parent_document
           parent_document
         end
 
         def find_child!(parent_document, association, child_id)
           child_document = parent_document.send(association).detect { |x| x.id == child_id }
-          error 404, [].to_json unless child_document
+          not_found! unless child_document
           child_document
         end
 
