@@ -209,8 +209,9 @@ module RestSinatra
         parent_id = params.delete("parent_id")
         child_id = params.delete("child_id")
         validate_before_find_one(params, child_model) # ?
-        parent_document, child_document = find_documents!(parent_model, parent_id, association, child_id)
+        parent_document = find_parent!(parent_model, parent_id)
         unauthorized_api_key! unless parent_resource.permitted?(@current_user, parent_document)
+        child_document = find_child!(parent_document, association, child_id)
         unauthorized_api_key! unless child_resource.permitted?(@current_user, child_document)
         sanitized = child_resource.sanitize(@current_user, child_document)
         sanitized.render
@@ -246,9 +247,10 @@ module RestSinatra
         )
         parent_id = params.delete("parent_id")
         child_id = params.delete("child_id")
-        @parent_document, @child_document = find_documents!(parent_model, parent_id, association, child_id)
+        @parent_document = find_parent!(parent_model, parent_id)
         unauthorized_api_key! unless parent_resource.permitted?(@current_user, @parent_document)
-        unauthorized_api_key! unless parent_resource.permitted?(@current_user, @child_document)
+        @child_document = find_child!(@parent_document, association, child_id)
+        unauthorized_api_key! unless child_resource.permitted?(@current_user, @child_document)
         validate_before_update(params, child_model, read_only)
         callback(callbacks[:before_save])
         callback(callbacks[:before_update])
@@ -268,8 +270,9 @@ module RestSinatra
         )
         parent_id = params.delete("parent_id")
         child_id = params.delete("child_id")
-        @parent_document, @child_document = find_documents!(parent_model, parent_id, association, child_id)
+        @parent_document = find_parent!(parent_model, parent_id)
         unauthorized_api_key! unless parent_resource.permitted?(@current_user, @parent_document)
+        @child_document = find_child!(@parent_document, association, child_id)
         unauthorized_api_key! unless child_resource.permitted?(@current_user, @child_document)
         callback(callbacks[:before_destroy])
         @parent_document.send(association).delete(@child_document)
@@ -289,12 +292,6 @@ module RestSinatra
           child_document = parent_document.send(association).detect { |x| x.id == child_id }
           not_found! unless child_document
           child_document
-        end
-
-        def find_documents!(parent_model, parent_id, association, child_id)
-          parent_document = find_parent!(parent_model, parent_id)
-          child_document = find_child!(parent_document, association, child_id)
-          [parent_document, child_document]
         end
       end
     end
