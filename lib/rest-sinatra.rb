@@ -102,7 +102,7 @@ module RestSinatra
 
       post '/?' do
         permission_check(
-          :default  => :curator,
+          :default  => :admin,
           :override => permission
         )
         validate_before_create(params, model, read_only)
@@ -120,7 +120,7 @@ module RestSinatra
 
       put '/:id/?' do
         permission_check(
-          :default  => :curator,
+          :default  => :admin,
           :override => permission
         )
         id = params.delete("id")
@@ -138,7 +138,7 @@ module RestSinatra
 
       delete '/:id/?' do
         permission_check(
-          :default  => :curator,
+          :default  => :admin,
           :override => permission
         )
         id = params.delete("id")
@@ -219,7 +219,7 @@ module RestSinatra
 
       post "/:parent_id/#{child_name}/?" do
         permission_check(
-          :default  => :curator,
+          :default  => :admin,
           :override => permission
         )
         parent_id = params.delete("parent_id")
@@ -242,7 +242,7 @@ module RestSinatra
 
       put "/:parent_id/#{child_name}/:child_id/?" do
         permission_check(
-          :default  => :curator,
+          :default  => :admin,
           :override => permission
         )
         parent_id = params.delete("parent_id")
@@ -265,7 +265,7 @@ module RestSinatra
 
       delete "/:parent_id/#{child_name}/:child_id/?" do
         permission_check(
-          :default  => :curator,
+          :default  => :admin,
           :override => permission
         )
         parent_id = params.delete("parent_id")
