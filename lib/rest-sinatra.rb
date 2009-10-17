@@ -89,7 +89,7 @@ module RestSinatra
         sanitized.render
       end
 
-      get '/:id/?' do |id|
+      get '/:id/?' do
         permission_check(
           :default  => :basic,
           :override => permission_to_view
